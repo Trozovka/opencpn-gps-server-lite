@@ -17,9 +17,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.trozovka.gpsserver.core.entitlement.EntitlementHost
+import com.trozovka.gpsserver.core.service.GpsServerService
 
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    onStartRequested: () -> Unit = {},
+    onStopRequested: () -> Unit = {},
+) {
     var running by remember { mutableStateOf(false) }
     val tierName = EntitlementHost.current().tierName
 
@@ -33,10 +37,13 @@ fun MainScreen() {
         ) {
             Text("OpenCPN GPS Server", style = MaterialTheme.typography.headlineSmall)
             Text(tierName, style = MaterialTheme.typography.bodyMedium)
-            Button(onClick = { running = !running }) {
+            Button(onClick = {
+                running = !running
+                if (running) onStartRequested() else onStopRequested()
+            }) {
                 Text(if (running) "Stop" else "Start")
             }
-            Text(if (running) "Running (server not yet implemented)" else "Stopped")
+            Text(if (running) "Running on port ${GpsServerService.DEFAULT_PORT}" else "Stopped")
         }
     }
 }

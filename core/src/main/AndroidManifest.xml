@@ -16,5 +16,13 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+    <application>
+        <service
+            android:name="com.trozovka.gpsserver.core.service.GpsServerService"
+            android:exported="false"
+            android:foregroundServiceType="location" />
+    </application>
 
 </manifest>
