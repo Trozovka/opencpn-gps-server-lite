@@ -121,6 +121,8 @@ fun SettingsScreen(
                 )
             }
 
+            EntitlementHost.current().SettingsExtras()
+
             HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
 
             Text("About", style = MaterialTheme.typography.titleMedium)

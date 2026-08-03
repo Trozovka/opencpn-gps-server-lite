@@ -11,6 +11,7 @@ import android.os.IBinder
 import android.os.PowerManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.trozovka.gpsserver.core.entitlement.EntitlementHost
 import com.trozovka.gpsserver.core.location.LocationSource
 import com.trozovka.gpsserver.core.nmea.GpsFix
 import com.trozovka.gpsserver.core.nmea.NmeaFormatter
@@ -55,8 +56,17 @@ class GpsServerService : Service() {
         locationSource.start()
         _isRunning.value = true
         _startTimeMillis.value = System.currentTimeMillis()
+        _capExpired.value = false
         scope.launch {
             locationSource.fixes.collect { _latestFix.value = it }
+        }
+        scope.launch {
+            val maxRuntime = EntitlementHost.current().maxRuntimeMillis()
+            if (maxRuntime != null) {
+                delay(maxRuntime)
+                _capExpired.value = true
+                stopSelf()
+            }
         }
     }
 
@@ -206,6 +216,15 @@ class GpsServerService : Service() {
 
         private val _isRunning = MutableStateFlow(false)
         val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
+
+        private val _capExpired = MutableStateFlow(false)
+
+        /** True once a runtime-capped tier's session hits its limit and auto-stops. */
+        val capExpired: StateFlow<Boolean> = _capExpired.asStateFlow()
+
+        fun acknowledgeCapExpired() {
+            _capExpired.value = false
+        }
 
         private val _startTimeMillis = MutableStateFlow<Long?>(null)
         val startTimeMillis: StateFlow<Long?> = _startTimeMillis.asStateFlow()

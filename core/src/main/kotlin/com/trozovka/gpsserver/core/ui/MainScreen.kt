@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -55,6 +56,7 @@ fun MainScreen(
     val sentStats by GpsServerService.sentStats.collectAsState()
     val startTimeMillis by GpsServerService.startTimeMillis.collectAsState()
     val debugLog by GpsServerService.debugLog.collectAsState()
+    val capExpired by GpsServerService.capExpired.collectAsState()
 
     var debugLogExpanded by remember { mutableStateOf(false) }
     var selectionWarning by remember { mutableStateOf<String?>(null) }
@@ -191,5 +193,18 @@ fun MainScreen(
                 debugLog = debugLog,
             )
         }
+    }
+
+    if (capExpired) {
+        AlertDialog(
+            onDismissRequest = { GpsServerService.acknowledgeCapExpired() },
+            title = { Text("Session limit reached") },
+            text = { Text("$tierName sessions are capped at 1 minute. Upgrade to Pro for unlimited runtime.") },
+            confirmButton = {
+                Button(onClick = { GpsServerService.acknowledgeCapExpired() }) {
+                    Text("OK")
+                }
+            },
+        )
     }
 }
