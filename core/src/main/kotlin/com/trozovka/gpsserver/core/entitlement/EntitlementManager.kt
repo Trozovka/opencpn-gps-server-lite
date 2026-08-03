@@ -13,7 +13,7 @@ interface EntitlementManager {
 }
 
 class FreeEntitlementManager : EntitlementManager {
-    override val tierName = "Lite"
+    override val tierName = "Free"
 
     override suspend fun maxRuntimeMillis(): Long = FREE_RUNTIME_CAP_MILLIS
 

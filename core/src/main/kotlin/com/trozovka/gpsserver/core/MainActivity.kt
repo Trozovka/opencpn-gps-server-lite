@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.MaterialTheme
@@ -58,6 +59,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 var showSettings by remember { mutableStateOf(false) }
+                BackHandler(enabled = showSettings) { showSettings = false }
                 if (showSettings) {
                     SettingsScreen(
                         preferences = preferences,

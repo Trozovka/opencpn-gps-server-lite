@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -28,7 +27,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -116,86 +114,82 @@ fun MainScreen(
             )
         },
     ) { padding ->
-        Column(modifier = Modifier.padding(padding).fillMaxSize()) {
-            MiniMap(
-                latitude = latestFix?.latitude,
-                longitude = latestFix?.longitude,
-                autoCenter = preferences.autoCenterMap,
-                modifier = Modifier.fillMaxWidth().height(220.dp),
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+        ) {
+            Text(tierName, style = MaterialTheme.typography.labelMedium)
+            Text(
+                "Backup/testing GNSS source -- not a certified primary navigation input",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+            Text("GPS: $gpsStatus")
+            Text("Network: ${if (connectedClient != null) "Connected" else "Disconnected"}")
+
+            Button(
+                onClick = {
+                    if (isRunning) {
+                        onStopRequested()
+                    } else if (selectedAddress == null && addresses.size > 1) {
+                        selectionWarning = "Select a network interface above before starting"
+                    } else {
+                        selectionWarning = null
+                        onStartRequested()
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (isRunning) RunningColor else StoppedColor,
+                ),
+                modifier = Modifier.padding(vertical = 8.dp),
+            ) {
+                Text(if (isRunning) "Stop" else "Start")
+            }
+            selectionWarning?.let {
+                Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+            }
+
+            IpPicker(
+                addresses = addresses,
+                selected = selectedAddress,
+                onSelect = { address ->
+                    selectedAddress = address
+                    preferences.boundAddress = address
+                    selectionWarning = null
+                },
+                modifier = Modifier.padding(vertical = 8.dp),
             )
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Text(tierName, style = MaterialTheme.typography.labelMedium)
-                Text("GPS: $gpsStatus")
-                Text("Network: ${if (connectedClient != null) "Connected" else "Disconnected"}")
-
-                Button(
-                    onClick = {
-                        if (isRunning) {
-                            onStopRequested()
-                        } else if (selectedAddress == null && addresses.size > 1) {
-                            selectionWarning = "Select a network interface above before starting"
-                        } else {
-                            selectionWarning = null
-                            onStartRequested()
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isRunning) RunningColor else StoppedColor,
-                    ),
-                    modifier = Modifier.padding(vertical = 8.dp),
-                ) {
-                    Text(if (isRunning) "Stop" else "Start")
-                }
-                selectionWarning?.let {
-                    Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
-                }
-
-                IpPicker(
-                    addresses = addresses,
-                    selected = selectedAddress,
-                    onSelect = { address ->
-                        selectedAddress = address
-                        preferences.boundAddress = address
-                        selectionWarning = null
-                    },
-                    modifier = Modifier.padding(vertical = 8.dp),
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    Text("Server port: ${preferences.port}")
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    Text("Client: ${connectedClient?.address ?: "--"}")
-                    Text("Port: ${connectedClient?.port ?: "--"}")
-                }
-
-                TelemetryPanel(
-                    snapshot = TelemetrySnapshot(
-                        fix = latestFix,
-                        latencyMillis = latencyMillis,
-                        sentenceCount = sentStats.sentenceCount,
-                        byteCount = sentStats.byteCount,
-                        runtimeLeftText = runtimeLeftText,
-                        metricUnits = preferences.metricUnits,
-                    ),
-                    debugLogExpanded = debugLogExpanded,
-                    onToggleDebugLog = { debugLogExpanded = !debugLogExpanded },
-                    debugLog = debugLog,
-                )
+                Text("Server port: ${preferences.port}")
             }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text("Client: ${connectedClient?.address ?: "--"}")
+                Text("Port: ${connectedClient?.port ?: "--"}")
+            }
+
+            TelemetryPanel(
+                snapshot = TelemetrySnapshot(
+                    fix = latestFix,
+                    latencyMillis = latencyMillis,
+                    sentenceCount = sentStats.sentenceCount,
+                    byteCount = sentStats.byteCount,
+                    runtimeLeftText = runtimeLeftText,
+                    metricUnits = preferences.metricUnits,
+                ),
+                debugLogExpanded = debugLogExpanded,
+                onToggleDebugLog = { debugLogExpanded = !debugLogExpanded },
+                debugLog = debugLog,
+            )
         }
     }
 }
