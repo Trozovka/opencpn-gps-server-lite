@@ -39,6 +39,8 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.9.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
     implementation("com.google.android.gms:play-services-location:21.3.0")
+    implementation("org.osmdroid:osmdroid-android:6.1.20")
+    implementation("androidx.compose.material:material-icons-core:1.6.8")
 
     val composeBom = platform("androidx.compose:compose-bom:2024.06.00")
     implementation(composeBom)

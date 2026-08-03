@@ -12,13 +12,20 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import com.trozovka.gpsserver.core.service.GpsServerService
+import com.trozovka.gpsserver.core.settings.AppPreferences
 import com.trozovka.gpsserver.core.ui.MainScreen
+import com.trozovka.gpsserver.core.ui.SettingsScreen
 
 class MainActivity : ComponentActivity() {
 
     private var startAfterPermissions = false
+    private lateinit var preferences: AppPreferences
 
     private val requestForegroundPermissions = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions(),
@@ -47,15 +54,27 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        preferences = AppPreferences(applicationContext)
         setContent {
             MaterialTheme {
-                MainScreen(
-                    onStartRequested = ::beginStartFlow,
-                    onStopRequested = ::stopServer,
-                )
+                var showSettings by remember { mutableStateOf(false) }
+                if (showSettings) {
+                    SettingsScreen(
+                        preferences = preferences,
+                        onBack = { showSettings = false },
+                    )
+                } else {
+                    MainScreen(
+                        preferences = preferences,
+                        onStartRequested = ::beginStartFlow,
+                        onStopRequested = ::stopServer,
+                        onOpenSettings = { showSettings = true },
+                    )
+                }
             }
         }
     }
+
 
     private fun beginStartFlow() {
         startAfterPermissions = true
@@ -108,7 +127,8 @@ class MainActivity : ComponentActivity() {
 
     private fun startServer() {
         val intent = Intent(this, GpsServerService::class.java).apply {
-            putExtra(GpsServerService.EXTRA_PORT, GpsServerService.DEFAULT_PORT)
+            putExtra(GpsServerService.EXTRA_PORT, preferences.port)
+            preferences.boundAddress?.let { putExtra(GpsServerService.EXTRA_BIND_ADDRESS, it) }
         }
         ContextCompat.startForegroundService(this, intent)
     }
