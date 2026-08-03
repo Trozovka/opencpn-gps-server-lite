@@ -11,3 +11,4 @@
 *.jks
 keystore-DO-NOT-COMMIT/
 local.properties
+*.apk
