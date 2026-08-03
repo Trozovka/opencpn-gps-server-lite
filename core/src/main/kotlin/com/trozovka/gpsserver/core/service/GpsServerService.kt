@@ -11,24 +11,29 @@ import android.os.IBinder
 import android.os.PowerManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.trozovka.gpsserver.core.location.LocationSource
+import com.trozovka.gpsserver.core.nmea.GpsFix
+import com.trozovka.gpsserver.core.nmea.NmeaFormatter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.io.IOException
+import java.io.OutputStream
 import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.Socket
 
 /**
  * Foreground service owning the TCP server socket, the wake lock that keeps it running with
- * the screen off, and (from Milestone 3 onward) the location callback. For Milestone 2 the
- * NMEA payload is a fixed sample sentence -- NmeaFormatter replaces it once real fixes are
- * wired in.
+ * the screen off, and the location callback that supplies each second's NMEA fix.
  */
 class GpsServerService : Service() {
 
@@ -36,11 +41,14 @@ class GpsServerService : Service() {
     private var serverJob: Job? = null
     private var wakeLock: PowerManager.WakeLock? = null
     private var boundAddress: String? = null
+    private lateinit var locationSource: LocationSource
 
     override fun onCreate() {
         super.onCreate()
         startForegroundWithNotification()
         acquireWakeLock()
+        locationSource = LocationSource(applicationContext)
+        locationSource.start()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -86,13 +94,27 @@ class GpsServerService : Service() {
             val out = client.getOutputStream()
             try {
                 while (scope.isActive) {
-                    out.write(HARDCODED_SENTENCE_BYTES)
-                    out.flush()
+                    locationSource.fixes.value?.let { writeFix(out, it) }
                     delay(1000)
                 }
             } catch (e: IOException) {
                 Log.i(TAG, "Client disconnected: ${e.message}")
             }
+        }
+    }
+
+    private fun writeFix(out: OutputStream, fix: GpsFix) {
+        val sentences = NmeaFormatter.gga(fix) +
+            NmeaFormatter.rmc(fix) +
+            NmeaFormatter.vtg(fix) +
+            NmeaFormatter.gsa(fix)
+        out.write(sentences.toByteArray())
+        out.flush()
+
+        val latencyMillis = System.currentTimeMillis() - fix.timestampMillis
+        _latencyMillis.value = latencyMillis
+        if (latencyMillis > LATENCY_WARNING_THRESHOLD_MILLIS) {
+            Log.w(TAG, "Fix-to-wire latency high: ${latencyMillis}ms")
         }
     }
 
@@ -137,7 +159,9 @@ class GpsServerService : Service() {
     override fun onDestroy() {
         serverJob?.cancel()
         scope.cancel()
+        locationSource.stop()
         releaseWakeLock()
+        _latencyMillis.value = null
         super.onDestroy()
     }
 
@@ -147,14 +171,15 @@ class GpsServerService : Service() {
         private const val TAG = "GpsServerService"
         private const val CHANNEL_ID = "gps_server_channel"
         private const val NOTIFICATION_ID = 1
+        private const val LATENCY_WARNING_THRESHOLD_MILLIS = 500L
         const val DEFAULT_PORT = 10110
         const val EXTRA_PORT = "extra_port"
         const val EXTRA_BIND_ADDRESS = "extra_bind_address"
         const val ACTION_STOP = "com.trozovka.gpsserver.core.action.STOP"
 
-        // Textbook NMEA GGA sample sentence with a verified checksum -- placeholder until
-        // Milestone 3 replaces this with NmeaFormatter output from real fixes.
-        private val HARDCODED_SENTENCE_BYTES =
-            "\$GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*47\r\n".toByteArray()
+        private val _latencyMillis = MutableStateFlow<Long?>(null)
+
+        /** Most recent fix-to-wire latency, for the telemetry panel (Milestone 4). */
+        val latencyMillis: StateFlow<Long?> = _latencyMillis.asStateFlow()
     }
 }
