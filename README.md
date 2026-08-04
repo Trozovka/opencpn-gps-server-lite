@@ -34,8 +34,8 @@ Since this isn't distributed through Google Play, Android will ask you to allow 
 Requires JDK 17 and the Android SDK (the Gradle wrapper handles the rest).
 
 ```
-git clone https://github.com/Trozovka/opencpn-gps-server-lite.git
-cd opencpn-gps-server-lite
+git clone https://github.com/Trozovka/opencpn-gps-server-free.git
+cd opencpn-gps-server-free
 echo "sdk.dir=/path/to/your/android-sdk" > local.properties
 ./gradlew assembleDebug
 adb install app/build/outputs/apk/debug/app-debug.apk

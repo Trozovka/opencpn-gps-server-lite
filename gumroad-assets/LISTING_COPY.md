@@ -30,7 +30,7 @@ The phone doesn't try to be a chartplotter — it has no map of its own. It's pu
 
 **Requirements:** Android 8.0 (Oreo) or newer. Installs via sideload (this isn't distributed through Google Play) — your phone will need "install from unknown sources" enabled for this app; that's expected for anything not from a store, not a sign of a problem.
 
-**Source code:** fully open, MIT licensed — [github.com/Trozovka/opencpn-gps-server-lite](https://github.com/Trozovka/opencpn-gps-server-lite)
+**Source code:** fully open, MIT licensed — [github.com/Trozovka/opencpn-gps-server-free](https://github.com/Trozovka/opencpn-gps-server-free)
 
 ## Screenshots to upload (in `gumroad-assets/`, in this order)
 1. `01_free_main_stopped.png` — main screen, idle, showing the clean UI and IP picker
