@@ -8,9 +8,45 @@ This is the free **Free** tier: fully functional, but each server session auto-s
 
 Developed by [Trozovka](https://github.com/Trozovka).
 
-## Status
+## Screenshots
 
-Under active development. This README will be filled in further (setup instructions, features list, screenshots) as milestones land; see the project's task list for current progress. Not yet ready to install and rely on.
+| Idle | Running, connected | Settings / About |
+|---|---|---|
+| ![Idle](gumroad-assets/01_free_main_stopped.png) | ![Running](gumroad-assets/02_free_main_running.png) | ![Settings](gumroad-assets/03_free_settings_about.png) |
+
+## Features
+
+- Full NMEA 0183 output ($GPGGA/$GPRMC/$GPVTG/$GPGSA) at 1Hz with correct checksums, built from `FusedLocationProviderClient` (with a `LocationManager`/GPS fallback)
+- Real Android foreground service with a partial wake lock -- keeps streaming with the screen locked, survives Doze once you grant the battery-optimization exemption
+- Live telemetry: GPS lock status, lat/lon, speed, altitude, heading, sent sentence/byte counts, and fix-to-wire latency (flags in red past 500ms)
+- Network interface picker for phones with more than one active connection (Wi-Fi, hotspot, USB tether)
+- Metric/imperial display toggle (the NMEA wire output always stays in NMEA-native units, regardless of the toggle -- that's what OpenCPN expects)
+- Each session runs for 1 minute, then auto-stops with an in-app upgrade prompt -- a real trial, not a crippled demo
+
+## Quick install (no building required)
+
+Download the APK from Gumroad and sideload it: **[trozovka.gumroad.com/l/OpenCPNGPSServerLite](https://trozovka.gumroad.com/l/OpenCPNGPSServerLite)** ($0)
+
+Since this isn't distributed through Google Play, Android will ask you to allow installing from this source the first time -- that's expected.
+
+## Build from source
+
+Requires JDK 17 and the Android SDK (the Gradle wrapper handles the rest).
+
+```
+git clone https://github.com/Trozovka/opencpn-gps-server-lite.git
+cd opencpn-gps-server-lite
+echo "sdk.dir=/path/to/your/android-sdk" > local.properties
+./gradlew assembleDebug
+adb install app/build/outputs/apk/debug/app-debug.apk
+```
+
+## Using it with OpenCPN
+
+1. Install and open the app, grant the location permissions it asks for, and allow the battery-optimization exemption when prompted -- this is what keeps it running with the screen off.
+2. Tap **Start**. Note the IP address shown under "Server IP (this device)."
+3. In OpenCPN on your laptop: **Options -> Connections -> Add Connection**. Set Type to `Network`, Protocol to `TCP`, Address to the phone's IP, DataPort to `10110` (or whatever you set in Settings). Check **Receive Input**, leave Output unchecked.
+4. OpenCPN should show a live GNSS fix within a couple of seconds.
 
 ## Tech stack
 
@@ -25,7 +61,7 @@ The server has to keep streaming fixes to OpenCPN while the phone's screen is lo
 
 ## Pro version
 
-A Pro version with unlimited server runtime is available separately. Link will be added here once it's live on Gumroad. The Pro app's source is private; this Free repo has the full free-tier source, openly available under the MIT license below.
+A Pro version with unlimited server runtime (one-time purchase) is available separately: **[trozovka.gumroad.com/l/OpenCPNGPSServerPro](https://trozovka.gumroad.com/l/OpenCPNGPSServerPro)** ($18). The Pro app's source is private; this Free repo has the full free-tier source, openly available under the MIT license below.
 
 ## License
 
