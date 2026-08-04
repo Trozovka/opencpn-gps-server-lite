@@ -199,7 +199,7 @@ fun MainScreen(
         AlertDialog(
             onDismissRequest = { GpsServerService.acknowledgeCapExpired() },
             title = { Text("Session limit reached") },
-            text = { Text("$tierName sessions are capped at 1 minute. Upgrade to Pro for unlimited runtime.") },
+            text = { Text(EntitlementHost.current().capExpiredMessage) },
             confirmButton = {
                 Button(onClick = { GpsServerService.acknowledgeCapExpired() }) {
                     Text("OK")

@@ -19,6 +19,14 @@ interface EntitlementManager {
      */
     @Composable
     fun SettingsExtras() {}
+
+    /**
+     * Shown when a capped session hits its runtime limit. Free's default points at buying Pro;
+     * Pro overrides this for its own unlicensed-fallback state, where "buy Pro" would be
+     * nonsensical since the user is already running the Pro app.
+     */
+    val capExpiredMessage: String
+        get() = "$tierName sessions are capped at 1 minute. Upgrade to Pro for unlimited runtime."
 }
 
 class FreeEntitlementManager : EntitlementManager {
