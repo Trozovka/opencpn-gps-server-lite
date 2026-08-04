@@ -174,7 +174,7 @@ class GpsServerService : Service() {
         val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("OpenCPN GPS Server running")
             .setContentText("Streaming NMEA to connected clients")
-            .setSmallIcon(android.R.drawable.ic_menu_mylocation)
+            .setSmallIcon(com.trozovka.gpsserver.core.R.drawable.ic_notification)
             .setOngoing(true)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .build()

@@ -25,7 +25,7 @@ Developed by [Trozovka](https://github.com/Trozovka).
 
 ## Quick install (no building required)
 
-Download the APK from Gumroad and sideload it: **[trozovka.gumroad.com/l/OpenCPNGPSServerLite](https://trozovka.gumroad.com/l/OpenCPNGPSServerLite)** ($0)
+Download the APK from Gumroad and sideload it: **[trozovka.gumroad.com/l/OpenCPNGPSServerFree](https://trozovka.gumroad.com/l/OpenCPNGPSServerFree)** ($0)
 
 Since this isn't distributed through Google Play, Android will ask you to allow installing from this source the first time -- that's expected.
 
@@ -65,4 +65,6 @@ A Pro version with unlimited server runtime (one-time purchase) is available sep
 
 ## License
 
-MIT - see [LICENSE](LICENSE).
+MIT - see [LICENSE](LICENSE) for the full text.
+
+Copyright (c) 2026 Trozovka. Original Author: Trozovka. All derivative works must retain the [NOTICE](NOTICE) file's attribution. Not a fork of, or derived from, any other project's source.
